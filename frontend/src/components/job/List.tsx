@@ -16,6 +16,7 @@
 
 import { Icon } from '@iconify/react';
 import Box from '@mui/material/Box';
+import { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ApiError } from '../../lib/k8s/api/v2/ApiError';
 import { KubeContainer } from '../../lib/k8s/cluster';
@@ -25,6 +26,7 @@ import { useNamespaces } from '../../redux/filterSlice';
 import { CreateResourceButton } from '../common';
 import { StatusLabel } from '../common/Label';
 import { StatusLabelProps } from '../common/Label';
+import { EmptyStateActions } from '../common/Resource/EmptyStateActions';
 import ResourceListView from '../common/Resource/ResourceListView';
 import { SimpleTableProps } from '../common/SimpleTable';
 import LightTooltip from '../common/Tooltip/TooltipLight';
@@ -94,7 +96,14 @@ export function makeJobStatusLabel(job: Job) {
 
 export default function JobsList() {
   const { items: jobs, errors } = Job.useList({ namespace: useNamespaces() });
-  return <JobsListRenderer jobs={jobs} errors={errors} reflectTableInURL />;
+  return (
+    <JobsListRenderer
+      jobs={jobs}
+      errors={errors}
+      reflectTableInURL
+      emptyActions={<EmptyStateActions resourceClass={Job} />}
+    />
+  );
 }
 
 export interface JobsListRendererProps {
@@ -106,6 +115,12 @@ export interface JobsListRendererProps {
   enableRowActions?: boolean;
   enableRowSelection?: boolean;
   hideCreateButton?: boolean;
+  /**
+   * Optional quick-action controls for the empty state. Only the top-level
+   * `JobsList` route sets this; embedded uses (CronJob/Deployment/etc
+   * Details pages) leave it unset for a bare empty state.
+   */
+  emptyActions?: ReactNode;
 }
 
 export function JobsListRenderer(props: JobsListRendererProps) {
@@ -118,6 +133,7 @@ export function JobsListRenderer(props: JobsListRendererProps) {
     enableRowActions,
     enableRowSelection,
     hideCreateButton,
+    emptyActions,
   } = props;
   const { t } = useTranslation(['glossary', 'translation']);
 
@@ -144,6 +160,7 @@ export function JobsListRenderer(props: JobsListRendererProps) {
       }}
       hideColumns={hideColumns}
       errors={errors}
+      emptyActions={emptyActions}
       columns={[
         'name',
         'namespace',

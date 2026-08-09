@@ -23,6 +23,7 @@ import { ApiError } from '../../lib/k8s/api/v2/ApiError';
 import ResourceQuota from '../../lib/k8s/resourceQuota';
 import { useNamespaces } from '../../redux/filterSlice';
 import { CreateResourceButton } from '../common/CreateResourceButton';
+import { EmptyStateActions } from '../common/Resource/EmptyStateActions';
 import ResourceListView from '../common/Resource/ResourceListView';
 import { SimpleTableProps } from '../common/SimpleTable';
 
@@ -46,6 +47,12 @@ export interface ResourceQuotaProps {
   hideColumns?: string[];
   reflectTableInURL?: SimpleTableProps['reflectInURL'];
   noNamespaceFilter?: boolean;
+  /**
+   * Optional quick-action controls for the empty state. Only the top-level
+   * `ResourceQuotaList` route sets this; embedded uses (Namespace Details
+   * page) leave it unset for a bare empty state.
+   */
+  emptyActions?: ReactNode;
 }
 
 export function ResourceQuotaRenderer(props: ResourceQuotaProps) {
@@ -55,6 +62,7 @@ export function ResourceQuotaRenderer(props: ResourceQuotaProps) {
     hideColumns = [],
     reflectTableInURL = 'resourcequotas',
     noNamespaceFilter,
+    emptyActions,
   } = props;
   const { t } = useTranslation(['glossary', 'translation']);
 
@@ -99,6 +107,7 @@ export function ResourceQuotaRenderer(props: ResourceQuotaProps) {
       }}
       errors={errors}
       data={resourceQuotas}
+      emptyActions={emptyActions}
       reflectInURL={reflectTableInURL}
       id="headlamp-resourcequotas"
     />
@@ -109,6 +118,11 @@ export default function ResourceQuotaList() {
   const { items: resourceQuotas, errors } = ResourceQuota.useList({ namespace: useNamespaces() });
 
   return (
-    <ResourceQuotaRenderer resourceQuotas={resourceQuotas} errors={errors} reflectTableInURL />
+    <ResourceQuotaRenderer
+      resourceQuotas={resourceQuotas}
+      errors={errors}
+      reflectTableInURL
+      emptyActions={<EmptyStateActions resourceClass={ResourceQuota} />}
+    />
   );
 }

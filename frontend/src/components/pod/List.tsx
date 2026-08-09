@@ -19,7 +19,7 @@ import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Fade from '@mui/material/Fade';
 import { TFunction } from 'i18next';
-import React, { useMemo, useState } from 'react';
+import React, { ReactNode, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ApiError } from '../../lib/k8s/api/v2/ApiError';
 import { DEFAULT_LIST_LIMIT } from '../../lib/k8s/api/v2/useKubeObjectList';
@@ -33,6 +33,7 @@ import { HeadlampEventType, useEventCallback } from '../../redux/headlampEventSl
 import { CreateResourceButton } from '../common';
 import { StatusLabel, StatusLabelProps } from '../common/Label';
 import Link from '../common/Link';
+import { EmptyStateActions } from '../common/Resource/EmptyStateActions';
 import ResourceListView from '../common/Resource/ResourceListView';
 import { useThrottle } from '../common/Resource/ResourceTable';
 import { SimpleTableProps } from '../common/SimpleTable';
@@ -210,6 +211,12 @@ export interface PodListProps {
   hasMore?: boolean;
   remainingItemCount?: number;
   onLoadMore?: () => Promise<void>;
+  /**
+   * Optional quick-action controls for the empty state. Only the top-level
+   * `PodList` route sets this; embedded uses (Deployment/StatefulSet/etc
+   * Details pages) leave it unset for a bare empty state.
+   */
+  emptyActions?: ReactNode;
 }
 
 export function PodListRenderer(props: PodListProps) {
@@ -226,6 +233,7 @@ export function PodListRenderer(props: PodListProps) {
     hasMore,
     remainingItemCount,
     onLoadMore,
+    emptyActions,
   } = props;
   const [loadingMore, setLoadingMore] = useState(false);
 
@@ -294,6 +302,7 @@ export function PodListRenderer(props: PodListProps) {
       }}
       hideColumns={hideColumns}
       errors={errors}
+      emptyActions={emptyActions}
       columns={[
         'name',
         'namespace',
@@ -597,6 +606,7 @@ export default function PodList() {
       hasMore={hasMore}
       remainingItemCount={remainingItemCount}
       onLoadMore={loadMore ? loadMorePodsAndMetrics : undefined}
+      emptyActions={<EmptyStateActions resourceClass={Pod} />}
     />
   );
 }

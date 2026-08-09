@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
+import { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ApiError } from '../../lib/k8s/api/v2/ApiError';
 import { LimitRange } from '../../lib/k8s/limitRange';
 import { useNamespaces } from '../../redux/filterSlice';
 import { CreateResourceButton } from '../common/CreateResourceButton';
+import { EmptyStateActions } from '../common/Resource/EmptyStateActions';
 import ResourceListView from '../common/Resource/ResourceListView';
 import { SimpleTableProps } from '../common/SimpleTable';
 
@@ -28,6 +30,12 @@ export interface LimitRangeProps {
   hideColumns?: string[];
   reflectTableInURL?: SimpleTableProps['reflectInURL'];
   noNamespaceFilter?: boolean;
+  /**
+   * Optional quick-action controls for the empty state. Only the top-level
+   * `LimitRangeList` route sets this; embedded uses (Namespace Details)
+   * leave it unset for a bare empty state.
+   */
+  emptyActions?: ReactNode;
 }
 
 export function LimitRangeRenderer(props: LimitRangeProps) {
@@ -37,6 +45,7 @@ export function LimitRangeRenderer(props: LimitRangeProps) {
     hideColumns = [],
     reflectTableInURL = 'limitranges',
     noNamespaceFilter,
+    emptyActions,
   } = props;
   const { t } = useTranslation(['glossary', 'translation']);
 
@@ -51,6 +60,7 @@ export function LimitRangeRenderer(props: LimitRangeProps) {
       }}
       errors={errors}
       data={limitRanges}
+      emptyActions={emptyActions}
       reflectInURL={reflectTableInURL}
       id="headlamp-limitranges"
     />
@@ -60,5 +70,12 @@ export function LimitRangeRenderer(props: LimitRangeProps) {
 export function LimitRangeList() {
   const { items: limitRanges, errors } = LimitRange.useList({ namespace: useNamespaces() });
 
-  return <LimitRangeRenderer limitRanges={limitRanges} errors={errors} reflectTableInURL />;
+  return (
+    <LimitRangeRenderer
+      limitRanges={limitRanges}
+      errors={errors}
+      reflectTableInURL
+      emptyActions={<EmptyStateActions resourceClass={LimitRange} />}
+    />
+  );
 }

@@ -20,6 +20,7 @@ import { useTranslation } from 'react-i18next';
 import Secret from '../../lib/k8s/secret';
 import { useNamespaces } from '../../redux/filterSlice';
 import { CreateResourceButton } from '../common';
+import { EmptyStateActions } from '../common/Resource/EmptyStateActions';
 import ResourceListView from '../common/Resource/ResourceListView';
 import { loadHideHelm, storeHideHelm } from './hideHelmSecrets';
 
@@ -41,6 +42,7 @@ export default function SecretList() {
       id="headlamp-secrets"
       title={t('Secrets')}
       data={filteredSecrets}
+      emptyActions={<EmptyStateActions resourceClass={Secret} />}
       errorMessage={Secret.getErrorMessage(error)}
       headerProps={{
         noNamespaceFilter: false,
